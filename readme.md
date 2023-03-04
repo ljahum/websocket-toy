@@ -24,7 +24,7 @@ go mod tidy
 ```shell
 
 cd server
-go mod init client
+go mod init server
 # 清理无效依赖，增加缺失依赖
 go mod tidy
 ```
