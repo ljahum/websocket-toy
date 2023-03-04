@@ -1,0 +1,6 @@
+github.com/WAY29/icecream-go v0.0.0-20220610003735-798113558438 h1:czy6W0PEpB4rJy5ZxUO2pMkSVsMWz7OeeScoBsuf3hw=
+github.com/WAY29/icecream-go v0.0.0-20220610003735-798113558438/go.mod h1:Z3QDDjR3TGo1/hq7jSa91zrxdct0JMgmyROEdcrgd5M=
+github.com/go-sql-driver/mysql v1.7.0 h1:ueSltNNllEqE3qcWBTD0iQd3IpL/6U+mJxLkazJ7YPc=
+github.com/go-sql-driver/mysql v1.7.0/go.mod h1:OXbVy3sEdcQ2Doequ6Z5BW6fXNQTmx+9S1MCJN5yJMI=
+github.com/shurcooL/go v0.0.0-20200502201357-93f07166e636 h1:aSISeOcal5irEhJd1M+IrApc0PdcN7e7Aj4yuEnOrfQ=
+github.com/shurcooL/go v0.0.0-20200502201357-93f07166e636/go.mod h1:TDJrrUr11Vxrven61rcy3hJMUqaf/CLWYhHNPmT14Lk=
