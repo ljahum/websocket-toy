@@ -36,4 +36,4 @@ go mod init server
 go mod tidy
 ```
 
-![exp](./1.png)
+![exp](./4.png)
