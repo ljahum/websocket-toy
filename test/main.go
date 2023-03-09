@@ -1,77 +1,53 @@
 package main
 
 import (
-	"database/sql"
+	"flag"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	"math/big"
-	"test/myaes"
+	"github.com/gosuri/uiprogress"
+	"time"
 )
 
+// flag包实现了命令行参数的解析。
+// 模仿mysql client 连接
 func main() {
-	text := []byte("1111222233334444")
-	for i := 0; i < len(text)/16; i++ {
-		fmt.Println(i)
-	}
-	//fmt.Println(string(text[0:16]))
-	//fmt.Println(string(text[16:32]))
-	key := []byte("1111222233334444")
-	enc := myaes.EncryptecbMode_withPadding(text, key)
-	fmt.Println(enc)
-	fmt.Println(len(enc))
-	dec := myaes.DecryptecbMode_withUnpadding(enc, []byte("1111222233334445"))
-	fmt.Println(string(dec))
-	fmt.Println(dec)
-	fmt.Println(len(dec))
 
-}
+	/*
+	   定义变量接收控制台参数
+	*/
 
-func myPow(M *big.Int, E *big.Int, N *big.Int) *big.Int {
-	var c big.Int
-	c.Exp(M, E, N)
+	// 用户
+	var username string
 
-	return &c
-}
-func InitDB() {
-	db, err := sql.Open("mysql", "root:123321@tcp(192.168.0.103:3306)/database?charset=utf8")
-	if err != nil { // 连接失败
-		fmt.Printf("connect mysql fail ! [%s]", err)
-	} else { // 连接成功
-		fmt.Println("connect to mysql success")
-	}
-	sqlStr := "SELECT * FROM `user_tab` WHERE `index`=1"
-	rows, err := db.Query(sqlStr)
-	if err != nil {
-		panic("fail to connect databse,err:")
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var u User
-		err := rows.Scan(&u.index, &u.Name, &u.Passwd)
-		if err != nil {
-			fmt.Printf("scan failed, err:%v\n", err)
-		}
-		fmt.Printf("name:%s passwd:%s \n", u.Name, u.Passwd)
+	// 主机名
+	var host string
+	// 端口号
+	var port int
+
+	// StringVar用指定的名称、控制台参数项目、默认值、使用信息注册一个string类型flag，并将flag的值保存到p指向的变量
+	flag.StringVar(&username, "u", "", "用户名,必填")
+	//flag.StringVar(&password, "p", "", "密码,默认为空")
+	flag.StringVar(&host, "h", "127.0.0.1", "主机名,默认 127.0.0.1")
+	flag.IntVar(&port, "P", 9999, "端口号,默认为9999")
+
+	// 从arguments中解析注册的flag。必须在所有flag都注册好而未访问其值时执行。未注册却使用flag -help时，会返回ErrHelp。
+	flag.Parse()
+
+	// 打印
+	fmt.Printf("username=%v host=%v port=%v", username, host, port)
+	uiprogress.Start() // 开始
+
+	var steps = []string{"key init"}
+	bar := uiprogress.AddBar(len(steps))
+
+	// prepend the current step to the bar
+	bar.PrependFunc(func(b *uiprogress.Bar) string {
+		return "app: " + steps[b.Current()-1]
+		//return "app: 密钥交换中"
+	})
+
+	for bar.Incr() {
+		time.Sleep(time.Millisecond * 100)
+		fmt.Println(213)
 	}
 
-	//DB = db
-	//return db
-}
-
-//	func GetDB() *sql.DB {
-//		return DB
-//	}
-type User struct {
-	index  int64
-	Name   string
-	Passwd string
-}
-
-//var DB *sql.DB
-
-type DHExchange struct {
-	P *big.Int
-	G *big.Int
-	A *big.Int
-	B *big.Int
 }

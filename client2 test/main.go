@@ -2,26 +2,34 @@ package main
 
 import (
 	"bufio"
-	"client2/myaes"
+	"client/myaes"
+	"client/sign"
 	"crypto/md5"
 	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
+	"flag"
 	"fmt"
-	"math/big"
-
-	"os"
-
 	"github.com/gorilla/websocket"
+	"math/big"
+	"os"
+	"strconv"
 )
+
+var PubKey *rsa.PublicKey
+var PriKey *rsa.PrivateKey
 
 var shearedkey []byte
 
-const userName = "user2"
+var userName string
 
 type msg_to_server struct {
 	ID      string `json:"ID"`
 	Payload string `json:"Payload"`
+	Sign    string `json:"Sign"`
 }
 
 type DHExchange struct {
@@ -63,25 +71,71 @@ func initkey(conn *websocket.Conn) bool {
 	checkEnc := myaes.DecryptecbMode_withUnpadding(plaintext, shearedkey)
 	fmt.Println("decrypto test:", string(checkEnc))
 	if string(checkEnc) == "hello" {
-		return true
+
 		fmt.Println("done")
 	} else {
+		fmt.Println("秘钥交换出错")
 		return false
 	}
+	//发送公钥
+	key, _ := os.ReadFile("./rsa_private.key")
+	pkcs8keyStr, _ := pem.Decode(key)
+	//解析成pkcs8格式私钥
+	//privateKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+
+	rowKey, _ := x509.ParsePKCS8PrivateKey(pkcs8keyStr.Bytes)
+	PriKey = rowKey.(*rsa.PrivateKey)
+	PubKey = &PriKey.PublicKey
+	JsonPubKey, _ := json.Marshal(PubKey)
+	conn.WriteMessage(websocket.TextMessage, JsonPubKey)
+	//测试签名
+	msg := "verifiable message"
+	encBytes := myaes.EncryptecbMode_withPadding([]byte(msg), shearedkey)
+	S := sign.RsaSign(PriKey, []byte(msg))
+
+	//反正b64一下
+	b64encbytes := base64.StdEncoding.EncodeToString(encBytes)
+	b64signature := base64.StdEncoding.EncodeToString(S)
+	data := msg_to_server{userName, b64encbytes, b64signature}
+
+	json_data, _ := json.Marshal(data)
+	conn.WriteMessage(websocket.TextMessage, json_data)
 
 	return true
 }
 func main() {
 
+	//var username string
+
+	// 主机名
+	var host string
+	// 端口号
+	var port int
+
+	// StringVar用指定的名称、控制台参数项目、默认值、使用信息注册一个string类型flag，并将flag的值保存到p指向的变量
+	flag.StringVar(&userName, "u", "", "用户名,必填")
+	//flag.StringVar(&password, "p", "", "密码,默认为空")
+	flag.StringVar(&host, "h", "127.0.0.1", "主机名,默认 127.0.0.1")
+	flag.IntVar(&port, "P", 9999, "端口号,默认为9999")
+	if userName == "" {
+		fmt.Println("用户名必填捏")
+	}
+	// 从arguments中解析注册的flag。必须在所有flag都注册好而未访问其值时执行。未注册却使用flag -help时，会返回ErrHelp。
+	flag.Parse()
+	//userName = "user1"
+	// 打印
+	fmt.Printf("username=%v host=%v port=%v\n", userName, host, port)
+
 	dl := websocket.Dialer{}
-	conn, _, err := dl.Dial("ws://127.0.0.1:9999", nil)
+	url := "ws://" + host + ":" + strconv.Itoa(port)
+	conn, _, err := dl.Dial(url, nil)
+
 	if initkey(conn) == false {
 		fmt.Println("秘钥协商失败")
 	} else {
 		fmt.Println("秘钥协商成功")
 	}
-	shearedkey = []byte("2222222222222222")
-	//os.Exit(0)
+
 	if err != nil {
 		return
 	}
@@ -109,12 +163,14 @@ func send(conn *websocket.Conn) {
 
 		rl, _, _ := reader.ReadLine()
 		msg := userName + ":" + string(rl)
-		//fmt.Println(msg)
+		//加密 编码 (base64真的重要吗?)
 		encBytes := myaes.EncryptecbMode_withPadding([]byte(msg), shearedkey)
+		S := sign.RsaSign(PriKey, []byte(msg))
+
+		//反正b64一下
 		b64encbytes := base64.StdEncoding.EncodeToString(encBytes)
-		//pack
-		//fmt.Println(b64encbytes)
-		data := msg_to_server{userName, b64encbytes}
+		b64signature := base64.StdEncoding.EncodeToString(S)
+		data := msg_to_server{userName, b64encbytes, b64signature}
 
 		json_data, _ := json.Marshal(data)
 		conn.WriteMessage(websocket.TextMessage, json_data)

@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/md5"
 	"crypto/rand"
+	"crypto/rsa"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -12,6 +13,7 @@ import (
 	"math/big"
 	"net/http"
 	"server/myaes"
+	"server/sign"
 )
 
 var connectionsList map[string]*websocket.Conn
@@ -23,6 +25,7 @@ var UP = websocket.Upgrader{
 
 // var userKey map[string]string = map[string]string{"admin": "202cb962ac59075b964b07152d234b70"}
 var SessionKeyList map[string][]byte
+var PubKeyList map[string]*rsa.PublicKey
 
 func myPow(M *big.Int, E *big.Int, N *big.Int) *big.Int {
 	var c big.Int
@@ -32,8 +35,11 @@ func myPow(M *big.Int, E *big.Int, N *big.Int) *big.Int {
 }
 
 type msg_to_server struct {
+	//payload和sign默认b64传输
+
 	ID      string `json:"ID"`
 	Payload string `json:"Payload"`
+	Sign    string `json:"Sign"`
 }
 
 type DHExchange struct {
@@ -65,7 +71,7 @@ func testkey() {
 	fmt.Println(hex.EncodeToString(shearedKey))
 
 }
-func initkey(conn *websocket.Conn) (string, []byte) {
+func initkey(conn *websocket.Conn) (string, []byte, *rsa.PublicKey) {
 
 	G, _ := rand.Prime(rand.Reader, 100)
 	P, _ := rand.Prime(rand.Reader, 128)
@@ -102,10 +108,27 @@ func initkey(conn *websocket.Conn) (string, []byte) {
 	//test aes
 	checkEnc := myaes.EncryptecbMode_withPadding([]byte("hello"), shearedkey)
 	conn.WriteMessage(websocket.TextMessage, checkEnc)
-	fmt.Println("done")
-	return client_hello.Username, shearedkey
+	fmt.Println("session exchange done")
+	//接受公钥
+	_, plaintext, _ = conn.ReadMessage()
+	var pubKey *rsa.PublicKey
+	_ = json.Unmarshal(plaintext, &pubKey)
+	//验证公钥
+	var recv_json msg_to_server
+	_, data, _ := conn.ReadMessage()
+	_ = json.Unmarshal(data, &recv_json)
+	encMsg, _ := base64.StdEncoding.DecodeString(recv_json.Payload)
+	signature, _ := base64.StdEncoding.DecodeString(recv_json.Sign)
+	plaintext = myaes.DecryptecbMode_withUnpadding(encMsg, shearedkey)
+	if sign.RsaVerify(pubKey, signature, plaintext) == true {
+		fmt.Println("身份认证成功")
+	} else {
+		fmt.Println("身份认证失败")
+	}
 
+	return client_hello.Username, shearedkey, pubKey
 }
+
 func handler(w http.ResponseWriter, r *http.Request) {
 	//testkey()
 
@@ -115,31 +138,36 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	SessionID, _ := initkey(conn)
+	SessionID, SeesionKey, Pubkey := initkey(conn)
 	fmt.Println(SessionID, "加入会话")
 	//os.Exit(0)
+
 	//connectionsList = append(connectionsList, conn)
 	connectionsList[SessionID] = conn
-	SessionKeyList["user1"] = []byte("1111111111111111")
-	SessionKeyList["user2"] = []byte("2222222222222222")
+	SessionKeyList[SessionID] = SeesionKey
+	//SessionKeyList["user2"] = []byte("2222222222222222")
+	PubKeyList[SessionID] = Pubkey
 
 	for {
 		var recv_json msg_to_server
 
 		//targetConn := conn
-		_, data, err := conn.ReadMessage()
+		_, data, _ := conn.ReadMessage()
 		_ = json.Unmarshal(data, &recv_json)
 
-		targetKey := SessionKeyList[recv_json.ID]
+		SessionKey := SessionKeyList[recv_json.ID]
+		userPubkey, _ := PubKeyList[recv_json.ID]
 		//fmt.Println("base64文本", recv_json.Payload)
 		encBytes, _ := base64.StdEncoding.DecodeString(recv_json.Payload)
+		signature, _ := base64.StdEncoding.DecodeString(recv_json.Sign)
+
 		fmt.Println("发送者", recv_json.ID)
-		fmt.Println("对应密钥", string(targetKey))
+		fmt.Println("对应密钥", string(SessionKey))
 
-		plaintext := myaes.DecryptecbMode_withUnpadding(encBytes, targetKey)
-
-		if err != nil {
-			break
+		plaintext := myaes.DecryptecbMode_withUnpadding(encBytes, SessionKey)
+		//认证
+		if sign.RsaVerify(userPubkey, signature, plaintext) == true {
+			fmt.Println(recv_json.ID, "用户消息认证成功")
 		}
 
 		for key, _ := range connectionsList { //[朴实无华的广播功能
@@ -156,6 +184,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	connectionsList = make(map[string]*websocket.Conn)
 	SessionKeyList = make(map[string][]byte)
+	PubKeyList = make(map[string]*rsa.PublicKey)
+
 	port := "9999"
 
 	fmt.Println("server start on port" + port)

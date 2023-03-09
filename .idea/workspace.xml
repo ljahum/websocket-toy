@@ -5,7 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0d4b7210-427c-436b-9235-41c52e30fc0e" name="变更" comment="">
-      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/rsa_private.key" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/sign/RSAsign.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client2 test/myaes/aes_function.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client2 test/sign/RSAsign.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/sign/RSAsign.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/client/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/client/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/client/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/myaes/aes_function.go" beforeDir="false" afterPath="$PROJECT_DIR$/client/myaes/aes_function.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client2/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/client2 test/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client2/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/client2 test/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client2/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/client2 test/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client2/myaes/aes_function.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/myaes/aes_function.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/myaes/aes_function.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/test/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/test/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/test/main.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,13 +71,16 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\16953\Desktop\websocket\client2" />
+      <recent name="C:\Users\16953\Desktop\websocket\client" />
       <recent name="C:\Users\16953\Desktop\websocket\test" />
     </key>
   </component>
-  <component name="RunManager" selected="Go 构建.go build client2">
+  <component name="RunManager" selected="Go 构建.go build client">
     <configuration name="go build client" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="websocket" />
       <working_directory value="$PROJECT_DIR$/client" />
+      <parameters value="-u ljahum" />
       <kind value="PACKAGE" />
       <package value="client" />
       <directory value="$PROJECT_DIR$" />
@@ -87,6 +108,7 @@
     <configuration name="go build test" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="websocket" />
       <working_directory value="$PROJECT_DIR$/test" />
+      <parameters value="ljahumljahum asdasdasd" />
       <kind value="PACKAGE" />
       <package value="test" />
       <directory value="$PROJECT_DIR$" />
@@ -101,10 +123,10 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Go 构建.go build client2" />
         <item itemvalue="Go 构建.go build client" />
         <item itemvalue="Go 构建.go build server" />
         <item itemvalue="Go 构建.go build test" />
+        <item itemvalue="Go 构建.go build client2" />
       </list>
     </recent_temporary>
   </component>
@@ -130,14 +152,9 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/client/main.go</url>
-          <line>118</line>
-          <option name="timeStamp" value="47" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/client/main.go</url>
-          <line>63</line>
-          <option name="timeStamp" value="67" />
+          <url>file://D:/Scoop/apps/go/current/src/crypto/rsa/pkcs1v15.go</url>
+          <line>319</line>
+          <option name="timeStamp" value="79" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
