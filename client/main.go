@@ -117,15 +117,15 @@ func main() {
 	//flag.StringVar(&password, "p", "", "密码,默认为空")
 	flag.StringVar(&host, "h", "127.0.0.1", "主机名,默认 127.0.0.1")
 	flag.IntVar(&port, "P", 9999, "端口号,默认为9999")
-	if userName == "" {
-		fmt.Println("用户名必填捏")
-	}
+
 	// 从arguments中解析注册的flag。必须在所有flag都注册好而未访问其值时执行。未注册却使用flag -help时，会返回ErrHelp。
 	flag.Parse()
 	//userName = "user1"
 	// 打印
 	fmt.Printf("username=%v host=%v port=%v\n", userName, host, port)
-
+	if userName == "" {
+		fmt.Println("用户名必填捏")
+	}
 	dl := websocket.Dialer{}
 	url := "ws://" + host + ":" + strconv.Itoa(port)
 	conn, _, err := dl.Dial(url, nil)
